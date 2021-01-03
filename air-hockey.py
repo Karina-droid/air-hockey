@@ -34,20 +34,7 @@ class Game(Scene):
 		
 	def touch_moved(self, touch):
 		if self.right_touch != (0, 0) or self.left_touch != (0, 0):
-			skateboard = None
-			touch_id = touch.touch_id
-			delta_y = touch.location.y - touch.prev_location.y
-			if touch_id in self.left_touch:
-				skateboard = self.left_player
-			elif touch_id in self.right_touch:
-				skateboard = self.right_player
-			
-			if skateboard:	
-				x, y = skateboard.position
-				if delta_y > 0:
-					skateboard.position = x, min(y + delta_y, sh/2 - 70)
-				elif delta_y < 0:
-					skateboard.position = x, max(y + delta_y, -sh/2 + 70)
+			self.move_skateboard(touch)
 				
 	
 	def touch_ended(self, touch):
@@ -58,8 +45,21 @@ class Game(Scene):
 			self.left_touch = (0, 0)
 			
 			
-	def move_skateboard(self, user_touch)
-	
+	def move_skateboard(self, user_touch):
+		skateboard = None
+		touch_id = user_touch.touch_id
+		delta_y = user_touch.location.y - user_touch.prev_location.y
+		if touch_id in self.left_touch:
+			skateboard = self.left_player
+		elif touch_id in self.right_touch:
+			skateboard = self.right_player
+			
+		if skateboard:	
+			x, y = skateboard.position
+			if delta_y > 0:
+				skateboard.position = x, min(y + delta_y, sh/2 - 70)
+			elif delta_y < 0:
+				skateboard.position = x, max(y + delta_y, -sh/2 + 70)
 			
 	
 run(Game())
