@@ -120,7 +120,10 @@ class Game(Scene):
 	def paddle_collision(self, paddle):
 		cos = (self.ball.position.x - paddle.position.x)/					 paddle.size[0]
 		sin = math.sin(math.acos(cos))
-		self.ball.v = (cos, sin)
+		if self.ball.position.y >= 0:
+			self.ball.v = (cos, sin)
+		else:
+			self.ball.v = (cos, -sin)
 		
 					
 					
