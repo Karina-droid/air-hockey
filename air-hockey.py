@@ -13,7 +13,7 @@ class Ball(SpriteNode):
 		self.size = (r*2, r*2)
 		self.v = Vector2(*v)
 		self.r = r
-		self.ball_speed = 10
+		self.ball_speed = 30
 		self.angle = random.uniform(0, 2*math.pi)
 		super().__init__('pzl:BallGray', parent=parent, *args, **kwargs)
 
@@ -23,7 +23,7 @@ class Game(Scene):
 	def setup(self):
 		self.background_color = '#ffffff'
 		board_shape = ui.Path.rounded_rect(0, 0, 
-																		sw-padding, 
+																		sw-padding+10, 
 																		sh-padding, 									padding/2)
 		board_shape.line_width = 4
 		self.board = ShapeNode(board_shape, 
@@ -42,12 +42,29 @@ class Game(Scene):
 								 
 		walls[1].rotation, walls[3].rotation = math.pi/2, math.pi/2
 							   
-		self.left_player = SpriteNode('pzl:PaddleBlue', position=(0, sh/2.7), parent=self.board)
+		self.blue_player = SpriteNode('pzl:PaddleBlue', position=(0, sh/2.7), parent=self.board)
 		
-		self.right_player = SpriteNode('pzl:PaddleRed', position=(0, -sh/2.7), parent=self.board)
+		self.red_player = SpriteNode('pzl:PaddleRed', position=(0, -sh/2.7), parent=self.board)
 		
 		self.right_touch, self.left_touch = (0, 0), (0, 0)
-		self.obstacles = walls + [self.right_player, self.left_player]
+		self.obstacles = walls + [self.red_player, self.blue_player]
+		
+		xb, yb = -sw/2 + padding*1.6, sh/2 - padding*1.6
+		xr, yr = -sw/2 + padding*1.6, -sh/2 + padding*1.6
+		
+		while xb < sw/2:
+			blue_spikes = SpriteNode(
+					'plf:Tile_Spikes', position=(xb, yb), 
+					color='black', 
+					parent=self.board)
+			blue_spikes.rotation = math.pi
+			xb += blue_spikes.size.w
+			
+		while xr < sw/2:
+			r_spikes = SpriteNode('plf:Tile_Spikes',
+					position=(xr, yr), color='black', 
+					parent=self.board)
+			xr += r_spikes.size.w
 		
 		self.spawn_ball()
 
@@ -60,9 +77,9 @@ class Game(Scene):
 
 	def touch_began(self, touch):
 		touch_loc = self.board.point_from_scene(touch.location)
-		if touch_loc in self.left_player.frame:
+		if touch_loc in self.blue_player.frame:
 			self.left_touch = touch.touch_id
-		elif touch_loc in self.right_player.frame:
+		elif touch_loc in self.red_player.frame:
 			self.right_touch = touch.touch_id
 
 
@@ -84,9 +101,9 @@ class Game(Scene):
 		touch_id = user_touch.touch_id
 		delta_x = user_touch.location.x - user_touch.prev_location.x
 		if touch_id in self.left_touch:
-			paddle = self.left_player
+			paddle = self.blue_player
 		elif touch_id in self.right_touch:
-			paddle = self.right_player
+			paddle = self.red_player
 
 		if paddle:  
 			x, y = paddle.position
@@ -105,10 +122,10 @@ class Game(Scene):
 		for obs in self.obstacles:
 			if self.ball.frame.intersects(obs.frame):
 				
-				if obs == self.right_player:
-					self.paddle_collision(self.right_player)
-				elif obs == self.left_player:
-					self.paddle_collision(self.left_player)
+				if obs == self.red_player:
+					self.paddle_collision(self.red_player)
+				elif obs == self.blue_player:
+					self.paddle_collision(self.blue_player)
 					
 				vx, vy = self.ball.v
 				if obs.rotation == math.pi/2:
@@ -118,7 +135,7 @@ class Game(Scene):
 					
 					
 	def paddle_collision(self, paddle):
-		cos = (self.ball.position.x - paddle.position.x)/					 paddle.size[0]
+		cos = (self.ball.position.x - paddle.position.x)/					 (paddle.size[0]*0.75)
 		sin = math.sin(math.acos(cos))
 		if self.ball.position.y >= 0:
 			self.ball.v = (cos, sin)
