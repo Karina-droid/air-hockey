@@ -9,7 +9,9 @@ padding = 30
 
 
 class Ball(SpriteNode):
-	def __init__(self, r=11, v=(1, 1), parent=None, *args, **kwargs):
+	def __init__(self, max_h, min_h, r=11, v=(1, 1), parent=None, *args, **kwargs):
+		self.max_h = max_h
+		self.min_h = min_h
 		self.size = (r*2, r*2)
 		self.v = Vector2(*v)
 		self.r = r
@@ -54,19 +56,21 @@ class Game(Scene):
 		
 		while xb < sw/2:
 			blue_spikes = SpriteNode(
-					'plf:Tile_Spikes', position=(xb, yb), 
+				  'plf:Tile_Spikes', position=(xb, yb), 
 					color='black', 
 					parent=self.board)
 			blue_spikes.rotation = math.pi
 			xb += blue_spikes.size.w
+		max_h = yb + blue_spikes.size.h
 			
 		while xr < sw/2:
-			r_spikes = SpriteNode('plf:Tile_Spikes',
+			red_spikes = SpriteNode('plf:Tile_Spikes',
 					position=(xr, yr), color='black', 
 					parent=self.board)
-			xr += r_spikes.size.w
+			xr += red_spikes.size.w
+		min_h = yr + red_spikes.size.h
 		
-		self.spawn_ball()
+		self.spawn_ball(max_h, min_h)
 
 
 	def update(self):
@@ -113,9 +117,10 @@ class Game(Scene):
 				paddle.position = max(x + delta_x, -sw/2 + 69), y
 
 
-	def spawn_ball(self):
-		self.ball = Ball(position=(0, 0), 							parent=self.board)
+	def spawn_ball(self, max_h, min_h):
+		self.ball = Ball(max_h, min_h, position=(0, 0),										   parent=self.board)
 		self.ball.v = (math.cos(self.ball.angle), 												 math.sin(self.ball.angle))
+		print(self.ball.max_h, self.ball.min_h)
 		
 		
 	def check_collisions(self):
@@ -142,7 +147,6 @@ class Game(Scene):
 		else:
 			self.ball.v = (cos, -sin)
 		
-					
-					
+								
 					
 run(Game())
